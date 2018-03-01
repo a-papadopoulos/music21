@@ -1544,7 +1544,8 @@ class ABCNote(ABCToken):
         try:
             pn, accDisp = self.getPitchName(nonChordSymStr,
                                       forceKeySignature=forceKeySignature)
-        except ABCHandlerException:
+        except ABCHandlerException as e:
+            raise e
             environLocal.warn(["Could not get pitch information from note: " ,
                                "{0}, assuming C".format(nonChordSymStr)])
             pn = "C"
