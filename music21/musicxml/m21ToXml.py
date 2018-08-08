@@ -5927,6 +5927,12 @@ class Test(unittest.TestCase):
         bytesOutUnicode = bytesOut.decode('utf-8')
         return bytesOutUnicode
 
+    def getET(self, obj):
+        SX = ScoreExporter(obj)
+        mxScore = SX.parse()
+        SX.indent(mxScore)
+        return mxScore
+
     def testBasic(self):
         pass
 
@@ -5953,6 +5959,39 @@ class Test(unittest.TestCase):
         p.insert(0.0, sl3)
         #p.getElementsByClass('Measure')[1].insert(0.0, sl3)
         self.assertEqual(self.getXml(p).count(u'<slur '), 6)
+
+    def testExportChordDurations(self):
+        from music21 import stream, note
+        from music21 import harmony
+
+        s = stream.Score()
+        p = stream.Part()
+        m = stream.Measure()
+        m.append(harmony.ChordSymbol('C'))
+        m.repeatAppend(note.Note('C'), 2)
+        m.append(harmony.ChordSymbol('G'))
+        m.repeatAppend(note.Note('C'), 2)
+        p.append(m)
+        m = stream.Measure()
+        m.append(harmony.ChordSymbol('C'))
+        m.repeatAppend(note.Note('C'), 2)
+        m.append(harmony.ChordSymbol('G'))
+        m.repeatAppend(note.Note('C'), 2)
+        p.append(m)
+        s.append(p)
+        s = s.makeMeasures()
+
+        mxScore = self.getET(s)
+        self.assertEqual(4, len(mxScore.findall('.//harmony')))
+        self.assertEqual(0, len(mxScore.findall('.//harmony/offset')))
+
+        # Assigning durations to ChordSymbols shouldn't add an offset in the
+        # exported XML!
+        s = harmony.realizeChordSymbolDurations(s).makeMeasures()
+
+        mxScore = self.getET(s)
+        self.assertEqual(4, len(mxScore.findall('.//harmony')))
+        self.assertEqual(0, len(mxScore.findall('.//harmony/offset')))
 
 class TestExternal(unittest.TestCase): # pragma: no cover
     def runTest(self):
