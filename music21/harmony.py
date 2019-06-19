@@ -22,6 +22,7 @@ import unittest
 from music21 import chord
 from music21 import common
 from music21 import duration
+from music21 import volume
 from music21 import exceptions21
 from music21 import interval
 from music21 import key
@@ -2432,6 +2433,15 @@ class NoChord(ChordSymbol):
     def writeAsChord(self, val):
         pass
 
+    @property
+    def volume(self):
+        if self._volume is None:
+            self._volume = volume.Volume(velocity=0, client=self)
+        return self._volume
+
+    @volume.setter
+    def volume(self, value):
+        pass
 
 # ------------------------------------------------------------------------------
 
